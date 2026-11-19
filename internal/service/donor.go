@@ -15,8 +15,15 @@ func BuildCenter(
 
 	statuses, err := p.Parse(url)
 	if err != nil{
-		return model.DonorCenter{}, fmt.Errorf("err pars", err)
+		return model.DonorCenter{}, err 
 	}
+	
+	if err := ValidateStatuses(statuses); err != nil{
+		return model.DonorCenter{}, fmt.Errorf(
+			"validation failed for %s: %w", name, err,
+		)
+	}
+
 	center := model.DonorCenter{
 		NameCenter:  name,
 		URL:         url,
@@ -57,7 +64,58 @@ func FindByColor(c model.DonorCenter, color string) []model.DonorStatus{
 			findColorArr = append(findColorArr, value)
 		}
 	}
-	return findColorArr
+	return findColorArr	
+}
+
+func ValidateStatuses(statuses []model.DonorStatus) error{
+	if len(statuses) != 8{
+		return fmt.Errorf("not 8 status: %d", len(statuses))
+	}
 	
+	validGroups := map[string]bool{
+		"0+": true,
+		"0-": true,
+		"A+": true,
+		"A-": true,
+		"B+": true,
+		"B-": true,
+		"AB+": true,
+		"AB-": true,
+	}
+	validColors := map[string]bool{
+        	"red":    true,
+        	"yellow": true,
+        	"green":  true,
+    	}
+
+	seenGroups := make(map[string]bool)
+
+	checkedAt := statuses[0].CheckedAt
+
+	for _, status := range statuses{
+
+		if !validGroups[status.BloodGroup]{
+			return fmt.Errorf("invalid blood group: %s", status.BloodGroup)
+		}
+
+		if seenGroups[status.BloodGroup]{
+			return fmt.Errorf("duplicate blood group: %s", status.BloodGroup)
+		}
+
+		seenGroups[status.BloodGroup] = true
+
+		if !validColors[status.Color] {
+				return fmt.Errorf("invalid color %s for group %s", status.Color, status.BloodGroup)
+		}
+
+		if status.CheckedAt.IsZero(){
+			return fmt.Errorf("empty time for group %s", status.BloodGroup)
+		}
+
+		if !status.CheckedAt.Equal(checkedAt) {
+			return fmt.Errorf("different check time for group %s", status.BloodGroup)
+        	}
+	}
+	return nil
 }
 
