@@ -9,6 +9,7 @@ import (
 
 func BuildCenter(
 	name     string,
+	city     string,
 	url      string,
 	p parser.Parser,
 )(model.DonorCenter, error){
@@ -26,6 +27,7 @@ func BuildCenter(
 
 	center := model.DonorCenter{
 		NameCenter:  name,
+		City:        city,
 		URL:         url,
 		Statuses:    statuses,
 	} 
