@@ -2,8 +2,9 @@ package parser
 
 import (
 	"donor-monitor/internal/model"
+	"context"
 )
 
 type Parser interface{
-	Parse(url string) ([]model.DonorStatus, error)
+	Parse(ctx context.Context, url string) ([]model.DonorStatus, error)
 }

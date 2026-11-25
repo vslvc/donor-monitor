@@ -5,16 +5,18 @@ import (
 	"donor-monitor/internal/parser"
 	"errors"
 	"fmt"
+	"context"
 )
 
 func BuildCenter(
+	ctx      context.Context,
 	name     string,
 	city     string,
 	url      string,
 	p parser.Parser,
 )(model.DonorCenter, error){
 
-	statuses, err := p.Parse(url)
+	statuses, err := p.Parse(ctx, url)
 	if err != nil{
 		return model.DonorCenter{}, err 
 	}

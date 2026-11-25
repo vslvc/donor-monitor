@@ -35,6 +35,19 @@ func (r *PostgresRepository) Close() error {
 	return r.db.Close()
 }
 
+func (r *PostgresRepository) SaveCenters(
+	centers []model.DonorCenter,
+) ([]model.DonorCenter, error){
+	for i, center := range centers{
+		id, err := r.SaveCenter(center)
+		if err != nil{
+			return nil, fmt.Errorf("error save center %w", err)
+		}
+		centers[i].ID = id
+	}
+	return centers, nil
+}
+
 func (r *PostgresRepository) SaveCenter(
 	center model.DonorCenter,
 ) (int64, error){
@@ -63,7 +76,6 @@ func (r *PostgresRepository) SaveCenter(
 	}
 
 	return id, nil
-
 }
 
 func (r * PostgresRepository) SaveCheck(

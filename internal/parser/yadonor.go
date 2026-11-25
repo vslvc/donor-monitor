@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 	"strings"
+	"context"
 	"donor-monitor/internal/model"
 	"github.com/PuerkitoBio/goquery"
 
@@ -12,14 +13,20 @@ import (
 
 type YaDonor struct{}
 
-func (p YaDonor) Parse(url string)([]model.DonorStatus, error){
+func (p YaDonor) Parse(ctx context.Context, url string)([]model.DonorStatus, error){
 
 	client := &http.Client{
 		Timeout: 15 * time.Second,
 	}
 	
 	// создание пустого запроса
-	request, err := http.NewRequest("GET", url, nil)
+	// request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequestWithContext( //  запрос с переданным контекстом
+		ctx,
+		http.MethodGet,
+		url,
+		nil,
+	)
 	if err != nil{
 		return nil, fmt.Errorf("request failed^ %w", err)
 	}
@@ -76,8 +83,7 @@ func (p YaDonor) Parse(url string)([]model.DonorStatus, error){
 
 			classes, _ := span.Attr("class")
 
-			color := "неизвестно"
-
+			var color string
 			if strings.Contains(classes, "red"){
 				color = "red"
 			} else if strings.Contains(classes, "yellow"){
